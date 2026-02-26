@@ -1,6 +1,10 @@
 pipeline {
-    // Ejecutar en cualquier nodo/agente disponible
-    agent any
+    agent {
+        docker {
+            image 'markhobson/maven-chrome:jdk-17' // Esta imagen ya tiene Maven, JDK17 y Chrome
+            args '-u root'
+        }
+    }
 
     // Definimos las herramientas globales configuradas en Jenkins
     tools {

@@ -39,6 +39,14 @@ pipeline {
             cucumber buildStatus: 'UNSTABLE',
                       fileIncludePattern: 'target/*.json', // Especificamos la carpeta target
                       sortingMethod: 'ALPHABETICAL'
+                      
+            echo '☁️ Enviando resultados a Jira (Xray)...'
+                        // El alias 'jira-server' es el que configuraste hace un momento
+                        step([$class: 'XrayImportBuilder',
+                              serverInstance: 'jira-server',
+                              endpointName: '/cucumber',
+                              projectKey: 'LQAE', // Cambia esto si el "Key" de tu proyecto en Jira es distinto
+                              importFilePath: 'target/cucumber.json'
         }
         success {
             echo '✅ Todas las pruebas pasaron exitosamente.'

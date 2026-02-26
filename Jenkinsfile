@@ -37,8 +37,8 @@ pipeline {
             echo 'Generando Reportes BDD...'
             // Quitamos cleanWs() momentáneamente para asegurar que Cucumber encuentre los JSON
             cucumber buildStatus: 'UNSTABLE',
-                     fileIncludePattern: '**/cucumber.json',
-                     sortingMethod: 'ALPHABETICAL'
+                      fileIncludePattern: 'target/*.json', // Especificamos la carpeta target
+                      sortingMethod: 'ALPHABETICAL'
         }
         success {
             echo '✅ Todas las pruebas pasaron exitosamente.'

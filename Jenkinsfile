@@ -26,7 +26,7 @@ pipeline {
         stage('🧪 Ejecución de Pruebas') {
             steps {
                 echo 'Ejecutando tests con Maven...'
-                // Forzamos que ignore fallos para que el reporte siempre se intente subir
+                // Ignoramos fallos para que siempre intente subir el reporte a Jira
                 sh 'mvn clean test -Dmaven.test.failure.ignore=true'
             }
         }
@@ -40,13 +40,14 @@ pipeline {
                      sortingMethod: 'ALPHABETICAL'
 
             echo '☁️ Enviando resultados a Jira (Xray)...'
-            // Cambio de sintaxis: xrayImportResults es más estable que step([$class...])
-            xrayImportResults (
+            // Usamos la sintaxis de 'step' con la clase específica, que es la más compatible
+            step([
+                $class: 'XrayImportBuilder',
                 serverInstance: 'jira-server',
                 projectKey: 'LQAE',
                 endpointName: '/cucumber',
                 importFilePath: 'target/cucumber.json'
-            )
+            ])
         }
         success {
             echo '✅ Pipeline finalizado con éxito.'

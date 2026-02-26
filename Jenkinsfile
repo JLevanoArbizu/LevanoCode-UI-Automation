@@ -26,33 +26,33 @@ pipeline {
         stage('🧪 Ejecución de Pruebas') {
             steps {
                 echo 'Ejecutando tests con Maven...'
-                sh 'mvn clean test'
+                // Forzamos que ignore fallos para que el reporte siempre se intente subir
+                sh 'mvn clean test -Dmaven.test.failure.ignore=true'
             }
         }
     }
 
     post {
         always {
-            echo 'Generando Reportes BDD...'
-            // Genera el reporte visual en Jenkins
+            echo '📊 Generando Reportes BDD en Jenkins...'
             cucumber buildStatus: 'UNSTABLE',
                      fileIncludePattern: 'target/*.json',
                      sortingMethod: 'ALPHABETICAL'
 
             echo '☁️ Enviando resultados a Jira (Xray)...'
-
-            step([$class: 'XrayImportBuilder',
-                  serverInstance: 'jira-server',
-                  endpointName: '/cucumber',
-                  projectKey: 'LQAE',
-                  importFilePath: 'target/cucumber.json'
-            ])
+            // Cambio de sintaxis: xrayImportResults es más estable que step([$class...])
+            xrayImportResults (
+                serverInstance: 'jira-server',
+                projectKey: 'LQAE',
+                endpointName: '/cucumber',
+                importFilePath: 'target/cucumber.json'
+            )
         }
         success {
-            echo '✅ Todas las pruebas pasaron exitosamente.'
+            echo '✅ Pipeline finalizado con éxito.'
         }
         failure {
-            echo '❌ Error en las pruebas. Revisa el reporte de Cucumber arriba.'
+            echo '❌ Error crítico en el Pipeline.'
         }
     }
 }

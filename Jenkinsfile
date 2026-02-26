@@ -1,59 +1,50 @@
 pipeline {
-    agent {
-        docker {
-            image 'markhobson/maven-chrome:jdk-17' // Esta imagen ya tiene Maven, JDK17 y Chrome
-            args '-u root'
-        }
-    }
+    agent any
 
-    // Definimos las herramientas globales configuradas en Jenkins
     tools {
-        maven 'Maven-3.9' // Asegúrate de que el nombre coincida con tu configuración de Jenkins
-        jdk 'JDK-17'      // Asegúrate de que el nombre coincida con tu configuración de Jenkins
+        maven 'Maven-3.9'
+        jdk 'JDK-17'
     }
 
     stages {
         stage('📥 Checkout') {
             steps {
-                echo 'Descargando código desde GitHub...'
-                // Jenkins clona automáticamente la rama configurada en el Job
+                echo 'Descargando código...'
                 checkout scm
             }
         }
 
-        stage('Verificar Entorno') {
+        stage('🔍 Verificar Entorno') {
             steps {
-                sh 'google-chrome --version || echo "Chrome no está instalado"'
+                echo 'Verificando herramientas instaladas...'
+                sh 'java -version'
                 sh 'mvn -version'
+                sh 'google-chrome --version'
             }
         }
 
-        stage('🧪 Ejecución de Pruebas (BDD)') {
+        stage('🧪 Ejecución de Pruebas') {
             steps {
-                echo 'Ejecutando tests con Maven y Cucumber...'
-                // Cambiado a 'sh' porque el contenedor de Docker es Linux
+                echo 'Ejecutando tests con Maven...'
+                // Importante: Tus Hooks ya tienen la lógica Headless, así que esto funcionará
                 sh 'mvn clean test'
             }
         }
     }
 
-    // El bloque 'post' se ejecuta SIEMPRE, sin importar si la prueba falló o pasó
     post {
         always {
             echo 'Generando Reportes BDD...'
-            // Plugin de Cucumber para generar el reporte visual
+            // Quitamos cleanWs() momentáneamente para asegurar que Cucumber encuentre los JSON
             cucumber buildStatus: 'UNSTABLE',
                      fileIncludePattern: '**/cucumber.json',
                      sortingMethod: 'ALPHABETICAL'
-
-            // Limpieza del espacio de trabajo (Buena práctica Enterprise)
-            cleanWs()
         }
         success {
             echo '✅ Todas las pruebas pasaron exitosamente.'
         }
         failure {
-            echo '❌ Algunas pruebas fallaron. Revisa el reporte.'
+            echo '❌ Error en las pruebas. Revisa el reporte de Cucumber arriba.'
         }
     }
 }

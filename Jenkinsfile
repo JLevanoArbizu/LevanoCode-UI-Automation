@@ -26,13 +26,13 @@ pipeline {
         stage('🧪 Ejecución de Pruebas') {
             steps {
                 echo 'Ejecutando tests con Maven...'
-                // Ignoramos fallos para que siempre intente subir el reporte a Jira
+                // Ignoramos fallos de tests para que pase al bloque post y envíe el reporte
                 sh 'mvn clean test -Dmaven.test.failure.ignore=true'
             }
         }
     }
 
-post {
+    post {
         always {
             echo '📊 Generando Reportes BDD en Jenkins...'
             cucumber buildStatus: 'UNSTABLE',
@@ -40,13 +40,14 @@ post {
                      sortingMethod: 'ALPHABETICAL'
 
             echo '☁️ Enviando resultados a Jira (Xray)...'
-            
+            // El código exacto generado por tu Jenkins con el projectKey inyectado
             step([
                 $class: 'XrayImportBuilder',
-                serverInstance: '9e64ae59-c568-4336-a7ea-4fb6a7aa558c',
+                serverInstance: 'CLOUD-302a3a46-968c-46bf-b622-b86ce7b9c8d0',
                 projectKey: 'LQAE',
                 endpointName: '/cucumber',
-                importFilePath: 'target/cucumber.json'
+                importFilePath: 'target/cucumber.json',
+                importInParallel: 'false'
             ])
         }
         success {

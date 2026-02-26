@@ -33,27 +33,27 @@ pipeline {
     }
 
     post {
-        always {
-            echo '📊 Generando Reportes BDD en Jenkins...'
-            cucumber buildStatus: 'UNSTABLE',
-                     fileIncludePattern: 'target/*.json',
-                     sortingMethod: 'ALPHABETICAL'
+            always {
+                echo '📊 Generando Reportes BDD en Jenkins...'
+                cucumber buildStatus: 'UNSTABLE',
+                         fileIncludePattern: 'target/*.json',
+                         sortingMethod: 'ALPHABETICAL'
 
-            echo '☁️ Enviando resultados a Jira (Xray)...'
-            // Usamos la sintaxis de 'step' con la clase específica, que es la más compatible
-            step([
-                $class: 'XrayImportBuilder',
-                serverInstance: 'jira-server',
-                projectKey: 'LQAE',
-                endpointName: '/cucumber',
-                importFilePath: 'target/cucumber.json'
-            ])
-        }
-        success {
-            echo '✅ Pipeline finalizado con éxito.'
-        }
-        failure {
-            echo '❌ Error crítico en el Pipeline.'
-        }
+                echo '☁️ Enviando resultados a Jira (Xray)...'
+                // Usamos comillas dobles para asegurar la interpretación del string
+                step([
+                    $class: 'XrayImportBuilder',
+                    serverInstance: "jira-server",
+                    projectKey: "LQAE",
+                    endpointName: "/cucumber",
+                    importFilePath: "target/cucumber.json"
+                ])
+            }
+            success {
+                echo '✅ Pipeline finalizado con éxito.'
+            }
+            failure {
+                echo '❌ Error crítico en el Pipeline.'
+            }
     }
 }

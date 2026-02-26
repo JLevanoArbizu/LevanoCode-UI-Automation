@@ -17,6 +17,13 @@ pipeline {
             }
         }
 
+        stage('Verificar Entorno') {
+            steps {
+                sh 'google-chrome --version || echo "Chrome no está instalado"'
+                sh 'mvn -version'
+            }
+        }
+
         stage('🧪 Ejecución de Pruebas (BDD)') {
             steps {
                 echo 'Ejecutando tests con Maven y Cucumber...'
